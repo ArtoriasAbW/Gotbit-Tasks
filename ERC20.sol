@@ -38,6 +38,12 @@ contract ERC20 is Context, IERC20 {
 
     string private _name;
     string private _symbol;
+    uint constant DAY_IN_SECONDS = 86400;
+
+    modifier notSaturday() {
+        require(uint8((block.timestamp / DAY_IN_SECONDS + 4) % 7) != 5, "Saturday. Token not transferred.");
+        _;
+    }
 
     /**
      * @dev Sets the values for {name} and {symbol}.
@@ -107,7 +113,7 @@ contract ERC20 is Context, IERC20 {
      * - `recipient` cannot be the zero address.
      * - the caller must have a balance of at least `amount`.
      */
-    function transfer(address recipient, uint256 amount) public virtual override returns (bool) {
+    function transfer(address recipient, uint256 amount) public notSaturday virtual override returns (bool) {
         _transfer(_msgSender(), recipient, amount);
         return true;
     }
@@ -143,7 +149,7 @@ contract ERC20 is Context, IERC20 {
      * - the caller must have allowance for ``sender``'s tokens of at least
      * `amount`.
      */
-    function transferFrom(address sender, address recipient, uint256 amount) public virtual override returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount) public notSaturday virtual override returns (bool) {
         _transfer(sender, recipient, amount);
 
         require(_allowances[sender][_msgSender()] >= amount, "ERC20: transfer amount exceeds allowance");
